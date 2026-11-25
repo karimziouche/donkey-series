@@ -6,7 +6,7 @@
     <h1>{{ program.title }}</h1>
     <h2>{{ season.name }}, {{ season.year }}</h2>
     {% for episode in season.episodes %}
-    <p>{{ episode.number }}, {{ episode.name }}</p>
+    <p>{{ episode.number }}, <a href="{{ path('program_episode_show', { programId: program.id, seasonId: season.id, episodeId: episode.id }) }}">{{ episode.name }}</a></p>
     {% else %}
     <p>Aucun épisode disponible</p>
     {% endfor %}
