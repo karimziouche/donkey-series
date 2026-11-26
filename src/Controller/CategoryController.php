@@ -1,6 +1,10 @@
 <?php
 namespace App\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Category;
+use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
 use App\Repository\ProgramRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +23,24 @@ public function index(CategoryRepository $categoryRepository): Response
         'website' => 'Donkey Séries',
         'categorys' => $categorys,
     ]);
+    }
+    #[Route('/new', name: 'new')]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $category = new Category();
+        $form = $this->createForm(CategoryType::class, $category);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($category);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('category_index');
+        }
+
+        return $this->render('category/new.html.twig', [
+            'form' => $form,
+        ]);
     }
     #[Route('/{categoryName}', name :'show')]
 public function show(string $categoryName, CategoryRepository $categoryRepository, ProgramRepository $programRepository): Response

@@ -1,6 +1,9 @@
 <?php
 namespace App\Controller;
 
+use App\Form\ProgramType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Episode;
 use App\Entity\Season;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -14,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/program', name: 'program_')]
 class ProgramController extends AbstractController
 {
-        #[Route('/', name: 'index')]
+    #[Route('/', name: 'index')]
     public function index(ProgramRepository $programRepository): Response
     {
         $programs = $programRepository->findAll();
@@ -24,7 +27,24 @@ class ProgramController extends AbstractController
             'programs' => $programs,
         ]);
     }
+    #[Route('/new', name: 'new')]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $program = new Program();
+        $form = $this->createForm(ProgramType::class, $program);
+        $form->handleRequest($request);
 
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($program);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('program_index');
+        }
+
+        return $this->render('program/new.html.twig', [
+            'form' => $form,
+        ]);
+    }
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Program $program): Response
     {
